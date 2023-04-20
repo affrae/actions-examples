@@ -18,7 +18,7 @@ jobs:
     outputs:
       issue_id: ${{ steps.set-matrix.outputs.result }}
     steps:
-    # checkout the repository
+
       - name: Checkout
         uses: actions/checkout@v3.5.2
 
@@ -29,7 +29,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue create --title "Listing App Installations for ${{ steps.date.outputs.date }}" --body "### Listing App Installations for ${{ steps.date.outputs.date }}.\n\n" --label "automation" --label "app installations"
+          gh issue create --title "Listing App Installations for ${{ steps.date.outputs.date }}" --body "### Listing App Installations for ${{ steps.date.outputs.date }}.
+          
+          " --label "automation" --label "app installations"
 
   matrix_maker:
     needs: open_preliminary_issue
