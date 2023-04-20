@@ -15,7 +15,6 @@ jobs:
 
   open_preliminary_issue:
     name: Open Preliminary Issue
-    needs: get_jwt_token
     runs-on: ubuntu-latest
     outputs:
       issue_url: ${{ steps.create-issue.outputs.url }}
@@ -58,7 +57,7 @@ jobs:
         run: echo "${{ steps.set-matrix.outputs.result }}"
 
   list_app_installs:
-    needs: [matrix_maker, open_preliminary_issue, get_jwt_token]
+    needs: [matrix_maker, open_preliminary_issue]
     name: List App Installs
     runs-on: ubuntu-latest
     strategy:
