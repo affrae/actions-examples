@@ -73,7 +73,9 @@ jobs:
           app-id: ${{ secrets.LISTINSTALLS_APPID }}
           private-key: ${{ secrets.LISTINSTALLS_KEY }}
 
-      - name: Get List 
+      - name: Get List
+        id: get_list
+        continue-on-error: true 
         env:
           GH_TOKEN: ${{ steps.get_token.outputs.jwt }}
         run: |
