@@ -1,4 +1,9 @@
-# This is a basic workflow to help you get started with Actions
+# This workflow allows you to report, givern a list of organizations, whether
+# a GitHub app of a particular APPID is installed on tah torganization.
+# It will open an issue in the repository the workflow is installed in
+# list the organizations and whether or not the app is installed on that org
+# If the app is installed, it will provide  alink to that installation's JSON data
+# as an archive of the workflow run
 
 name: List App Installs
 
@@ -8,7 +13,22 @@ on:
 
 jobs:
 
+  open_preliminary_issue:
+    runs-on: ubuntu-latest
+    outputs:
+      issue_id: ${{ steps.set-matrix.outputs.result }}
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+      - name: Create an issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create --title "Listing App Installations for ${{ steps.date.outputs.date }}" --body "### Listing App Installations for ${{ steps.date.outputs.date }}.\n\n" --label "automation" --label "app installations"
+
   matrix_maker:
+    needs: open_preliminary_issue
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.result }}
@@ -44,9 +64,6 @@ jobs:
           app-id: ${{ secrets.LISTINSTALLS_APPID }}
           private-key: ${{ secrets.LISTINSTALLS_KEY }}
 
-      - name: GH Version
-        run: gh --version
-
       - name: Get List 
         env:
           GH_TOKEN: ${{ steps.get_token.outputs.jwt }}
@@ -60,16 +77,16 @@ jobs:
           name: ${{matrix.org}}
           path: output/${{matrix.org}}.json
 
-      - name: Create an issue if failure
-        if: failure()
-        uses: actions-ecosystem/action-create-issue@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          title: The List App Installs job failed to run for ${{matrix.org}}.
-          body: |
-            The List App Installs job failed to run for ${{matrix.org}}.
+      # - name: Create an issue if failure
+      #   if: failure()
+      #   uses: actions-ecosystem/action-create-issue@v1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     title: The List App Installs job failed to run for ${{matrix.org}}.
+      #     body: |
+      #       The List App Installs job failed to run for ${{matrix.org}}.
 
-          labels: |
-            bug
-            automation
+      #     labels: |
+      #       bug
+      #       automation
        
