@@ -16,7 +16,7 @@ jobs:
   open_preliminary_issue:
     runs-on: ubuntu-latest
     outputs:
-      issue_id: ${{ steps.set-matrix.outputs.result }}
+      issue_url: ${{ steps.set-create-issue.outputs.url }}
     steps:
 
       - name: Checkout
@@ -26,12 +26,11 @@ jobs:
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
       - name: Create an issue
+        id: create-issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue create --title "Listing App Installations for ${{ steps.date.outputs.date }}" --body "### Listing App Installations for ${{ steps.date.outputs.date }}.
-          
-          " --label "automation" --label "app installations"
+          echo "url=$(gh issue create --title 'Listing App Installations for ${{ steps.date.outputs.date }}' --body '### Listing App Installations for ${{ steps.date.outputs.date }}.' --label 'automation' --label 'app installations')" >> $GITHUB_OUTPUT
 
   matrix_maker:
     needs: open_preliminary_issue
@@ -83,16 +82,19 @@ jobs:
           name: ${{matrix.org}}
           path: output/${{matrix.org}}.json
 
-      # - name: Create an issue if failure
-      #   if: failure()
-      #   uses: actions-ecosystem/action-create-issue@v1
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     title: The List App Installs job failed to run for ${{matrix.org}}.
-      #     body: |
-      #       The List App Installs job failed to run for ${{matrix.org}}.
+      - name: Add to issue if failure
+        if: failure()
+        id: failure-add-to-issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "gh issue comment ${{jobs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} failed to list an installation.'
 
-      #     labels: |
-      #       bug
-      #       automation
+      - name: Add to issue if success
+        if: success()
+        id: success-add-to-issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "gh issue comment ${{jobs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} succeeded to list an installation.'
        
