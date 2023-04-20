@@ -88,7 +88,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "gh issue comment ${{jobs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} failed to list an installation.'
+          echo "gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} failed to list an installation.'
 
       - name: Add to issue if success
         if: success()
@@ -96,5 +96,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "gh issue comment ${{jobs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} succeeded to list an installation.'
+          echo "gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} succeeded to list an installation.'
        
