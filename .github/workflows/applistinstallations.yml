@@ -25,14 +25,15 @@ jobs:
 
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y%m%d-%H%M%S')"
+        run: |
+          echo "date=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
       - name: Create an issue
         id: create-issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           THEURL=$(gh issue create --title 'Listing App Installations for ${{ steps.date.outputs.date }}' --body '### Listing App Installations for ${{ steps.date.outputs.date }}.' --label 'automation' --label 'app installations')
-          echo "::set-output name=url::$THEURL"
+          echo "url=$THEURL" >> $GITHUB_OUTPUT
 
   matrix_maker:
     needs: [open_preliminary_issue]
