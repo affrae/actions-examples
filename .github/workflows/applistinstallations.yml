@@ -75,7 +75,6 @@ jobs:
 
       - name: Get List
         id: get_list
-        continue-on-error: true 
         env:
           GH_TOKEN: ${{ steps.get_token.outputs.jwt }}
         run: |
