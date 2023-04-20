@@ -34,7 +34,7 @@ jobs:
         run: |
           THEURL=$(gh issue create --title 'Listing App Installations for ${{ steps.date.outputs.date }}' --body '### Listing App Installations for ${{ steps.date.outputs.date }}.\
           \
-          Run URL: ${{$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID}}' --label 'automation' --label 'app installations')
+          Run URL: ${{ $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID }}' --label 'automation' --label 'app installations')
           echo "url=$THEURL" >> $GITHUB_OUTPUT
 
   matrix_maker:
