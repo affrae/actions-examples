@@ -13,8 +13,22 @@ on:
 
 jobs:
 
+  get_jwt_token:
+    name: GitHub app JWT and installation access token generation
+    runs-on: ubuntu-latest
+    outputs:
+      jwt_token: ${{ steps.get_token.outputs.jwt }}
+    steps:
+      - name: GitHub app JWT and installation access token generation
+        id: get_token
+        uses: jamestrousdale/github-app-jwt-token@0.1.4
+        with:
+          app-id: ${{ secrets.LISTINSTALLS_APPID }}
+          private-key: ${{ secrets.LISTINSTALLS_KEY }}
+
   open_preliminary_issue:
     name: Open Preliminary Issue
+    needs: get_jwt_token
     runs-on: ubuntu-latest
     outputs:
       issue_url: ${{ steps.create-issue.outputs.url }}
@@ -25,7 +39,7 @@ jobs:
 
       - name: Get current date
         id: date
-        run: echo "::set-output name=date::$(date +'%Y%m%d')"
+        run: echo "::set-output name=date::$(date +'%Y%m%d-%H%M%S')"
       - name: Create an issue
         id: create-issue
         env:
@@ -35,7 +49,7 @@ jobs:
           echo "::set-output name=url::$THEURL"
 
   matrix_maker:
-    needs: open_preliminary_issue
+    needs: [open_preliminary_issue]
     name: Matrix Maker
     runs-on: ubuntu-latest
     outputs:
@@ -57,7 +71,7 @@ jobs:
         run: echo "${{ steps.set-matrix.outputs.result }}"
 
   list_app_installs:
-    needs: [matrix_maker, open_preliminary_issue]
+    needs: [matrix_maker, open_preliminary_issue, get_jwt_token]
     name: List App Installs
     runs-on: ubuntu-latest
     strategy:
@@ -65,19 +79,12 @@ jobs:
       matrix:
         org: ${{fromJson(needs.matrix_maker.outputs.matrix)}}
     steps:                            
-      - name: GitHub app JWT and installation access token generation
-        id: get_token
-        uses: jamestrousdale/github-app-jwt-token@0.1.4
-        with:
-          app-id: ${{ secrets.LISTINSTALLS_APPID }}
-          private-key: ${{ secrets.LISTINSTALLS_KEY }}
-
       - name: Get List 
         env:
-          GH_TOKEN: ${{ steps.get_token.outputs.jwt }}
+          GH_TOKEN: ${{ needs.get_jwt_token.outputs.jwt_token }}
         run: |
           mkdir -p output
-          gh api -H "Authorization: Bearer ${{ steps.get_token.outputs.jwt }}" orgs/${{matrix.org}}/installation > output/${{matrix.org}}.json
+          gh api -H "Authorization: Bearer ${{ needs.get_jwt_token.outputs.jwt_token }}" orgs/${{matrix.org}}/installation > output/${{matrix.org}}.json
 
       - name: Upload list result for ${{matrix.org}}
         uses: actions/upload-artifact@v3
@@ -91,7 +98,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} does not contain an installation.'
+          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` does not contain an installation.'
 
       - name: Add to issue if success
         if: success()
@@ -99,5 +106,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} contains an installation.'
+          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` contains an installation.'
        
