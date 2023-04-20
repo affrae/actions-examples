@@ -83,12 +83,6 @@ jobs:
           mkdir -p output
           gh api -H "Authorization: Bearer ${{ steps.get_token.outputs.jwt }}" orgs/${{matrix.org}}/installation > output/${{matrix.org}}.json
 
-      - name: Upload list result for ${{matrix.org}}
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{matrix.org}}
-          path: output/${{matrix.org}}.json
-
       - name: Add to issue if failure
         if: failure()
         id: failure-add-to-issue
@@ -97,11 +91,22 @@ jobs:
         run: |
           gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` does not contain an installation.'
 
+
+      - name: Upload app installation json artifact for ${{matrix.org}} if installation detected
+        if: success()
+        id: success-upload-app-installation-json-artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{matrix.org}}
+          path: output/${{matrix.org}}.json
+
       - name: Add to issue if success
         if: success()
         id: success-add-to-issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` contains an installation.'
+          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` contains an installation. \
+          
+          Installation JSON: ${{github.server_url}}/${{github.repository}}/actions/artifacts/${{steps.success-upload-app-installation-json-artifact.outputs.artifact_id}}/zip'
        
