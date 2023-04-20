@@ -106,7 +106,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{fromJSON(steps.success-upload-app-installation-json-artifact.outputs)}}"
+          echo "${{ fromJSON(steps.success-upload-app-installation-json-artifact.outputs) }}"
           
           gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` contains an installation. 
           
