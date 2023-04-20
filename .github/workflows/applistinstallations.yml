@@ -1,9 +1,13 @@
 # This workflow allows you to report, givern a list of organizations, whether
-# a GitHub app of a particular APPID is installed on tah torganization.
-# It will open an issue in the repository the workflow is installed in
-# list the organizations and whether or not the app is installed on that org
-# If the app is installed, it will provide  alink to that installation's JSON data
-# as an archive of the workflow run
+# a GitHub app of a particular APPID is installed on the organization.
+# It will:
+# - open an issue in the repository the workflow is installed in
+# - in that issue, list the organizations and whether or not the app is installed on that org
+# It will provide a link to the workflow run so that any particular org's installation JSON data can be retrieved
+# for the GitHub App in question.
+
+# This workflow is triggered manually. It requires access to
+# both a secret of a GitHub App's APPID and another of a private key for that app.
 
 name: List App Installs
 
