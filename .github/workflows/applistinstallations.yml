@@ -34,7 +34,8 @@ jobs:
         run: |
           THEURL=$(gh issue create --title 'Listing App Installations for ${{ steps.date.outputs.date }}' --body '### Listing App Installations for ${{ steps.date.outputs.date }}.
           \
-          Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}' --label 'automation' --label 'app installations')
+          Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} \
+          Artifacts may be downloaded from that page for a period of 90 days after the completion of this workflow run.' --label 'automation' --label 'app installations')
           echo "url=$THEURL" >> $GITHUB_OUTPUT
 
   matrix_maker:
@@ -106,9 +107,4 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "${{ fromJSON(steps.success-upload-app-installation-json-artifact.outputs) }}"
-          
-          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` contains an installation. 
-          
-          Installation JSON (available for 90 days from workflow run): ${{github.server_url}}/${{github.repository}}/actions/artifacts/${{steps.success-upload-app-installation-json-artifact.outputs.artifact_id}}/zip'
-       
+          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body 'The org `${{matrix.org}}` contains an installation.'
