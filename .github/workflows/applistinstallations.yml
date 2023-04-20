@@ -14,6 +14,7 @@ on:
 jobs:
 
   open_preliminary_issue:
+    name: Open Preliminary Issue
     runs-on: ubuntu-latest
     outputs:
       issue_url: ${{ steps.set-create-issue.outputs.url }}
@@ -34,6 +35,7 @@ jobs:
 
   matrix_maker:
     needs: open_preliminary_issue
+    name: Matrix Maker
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.set-matrix.outputs.result }}
@@ -54,7 +56,7 @@ jobs:
         run: echo "${{ steps.set-matrix.outputs.result }}"
 
   list_app_installs:
-    needs: matrix_maker
+    needs: [matrix_maker, open_preliminary_issue]
     name: List App Installs
     runs-on: ubuntu-latest
     strategy:
@@ -88,7 +90,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} failed to list an installation.'
+          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} failed to list an installation.'
 
       - name: Add to issue if success
         if: success()
@@ -96,5 +98,5 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} succeeded to list an installation.'
+          gh issue comment ${{needs.open_preliminary_issue.outputs.issue_url}} --body '${{matrix.org}} succeeded to list an installation.'
        
