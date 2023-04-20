@@ -18,6 +18,10 @@ jobs:
     outputs:
       issue_id: ${{ steps.set-matrix.outputs.result }}
     steps:
+    # checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v3.5.2
+
       - name: Get current date
         id: date
         run: echo "::set-output name=date::$(date +'%Y%m%d')"
